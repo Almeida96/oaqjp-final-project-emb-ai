@@ -61,9 +61,11 @@ def main():
                         "I am very happy to learn Python!"
                     )
                     page.get_by_role("button", name="Analyze emotion").click()
-                    page.locator("#system_response").get_by_text(
-                        "The dominant emotion is joy", exact=False
-                    ).wait_for(timeout=10000)
+                    page.wait_for_function(
+                        "document.getElementById('system_response').textContent"
+                        ".includes('The dominant emotion is joy')",
+                        timeout=10000,
+                    )
                     page.get_by_text(
                         "TEST MODE", exact=False
                     ).wait_for(timeout=10000)
