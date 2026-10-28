@@ -1,0 +1,60 @@
+name: Emotion detector - cloud verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "EmotionDetection/**"
+      - "verify_import.py"
+      - ".github/workflows/emotion-verification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Offline import and simulated Watson tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependency
+        run: python -m pip install requests
+      - name: Verify Python syntax
+        run: python -m compileall -q EmotionDetection verify_import.py
+      - name: Run reproducible import tests (mock only)
+        run: python verify_import.py
+
+  watson-live:
+    name: Real Watson NLP endpoint (requires external service)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Call the real Watson NLP service
+        run: |
+          python - <<'PY'
+          from EmotionDetection.emotion_detection import emotion_detector
+          import requests
+
+          try:
+              result = emotion_detector("I am glad this happened")
+          except requests.exceptions.RequestException as exc:
+              print(f"LIVE SERVICE UNAVAILABLE: {type(exc).__name__}: {exc}")
+              raise SystemExit(1) from exc
+          except Exception as exc:
+              print(f"LIVE RESPONSE INVALID: {type(exc).__name__}: {exc}")
+              raise SystemExit(1) from exc
+
+          if result["dominant_emotion"] is None:
+              raise SystemExit("LIVE RESPONSE INVALID: no dominant emotion")
+          print("LIVE WATSON RESPONSE RECEIVED")
+          print(result)
+          PY
