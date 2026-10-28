@@ -37,7 +37,7 @@ jobs:
             python -m playwright install chromium
           fi
       - name: Start Flask and capture test-mode screenshot in Chromium
-        run: python tools/capture_flask_demo.py
+        run: PYTHONPATH=. python tools/capture_flask_demo.py
       - name: Upload screenshot artifact
         uses: actions/upload-artifact@v4
         with:
