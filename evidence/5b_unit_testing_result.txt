@@ -1,0 +1,20 @@
+GitHub Actions execution of Python unit tests, 2026-10-28
+Run URL: https://github.com/Almeida96/oaqjp-final-project-emb-ai/actions/runs/40724403495
+Command: python -m unittest -v test_emotion_detection
+Watson HTTP calls were MOCKED in all 11 tests; no live Watson classification was verified.
+
+VERIFIED OUTPUT (timestamp prefixes omitted):
+
+test_anger (test_emotion_detection.TestEmotionDetection.test_anger) ... ok
+test_blank_input (test_emotion_detection.TestEmotionDetection.test_blank_input) ... ok
+test_connection_timeout_raises (test_emotion_detection.TestEmotionDetection.test_connection_timeout_raises) ... ok
+test_disgust (test_emotion_detection.TestEmotionDetection.test_disgust) ... ok
+test_fear (test_emotion_detection.TestEmotionDetection.test_fear) ... ok
+test_http_400 (test_emotion_detection.TestEmotionDetection.test_http_400) ... ok
+test_http_500_raises (test_emotion_detection.TestEmotionDetection.test_http_500_raises) ... ok
+test_invalid_input_type (test_emotion_detection.TestEmotionDetection.test_invalid_input_type) ... ok
+test_joy (test_emotion_detection.TestEmotionDetection.test_joy) ... ok
+test_malformed_response_raises (test_emotion_detection.TestEmotionDetection.test_malformed_response_raises) ... ok
+test_sadness (test_emotion_detection.TestEmotionDetection.test_sadness) ... ok
+Ran 11 tests in 0.008s
+OK
