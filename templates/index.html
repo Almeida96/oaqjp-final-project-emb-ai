@@ -1,32 +1,37 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="./static/mywebscript.js"></script>
-    <style>
-        .center-heading {
-            text-align: center;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emotion Detector | Watson NLP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="{{ url_for('static', filename='mywebscript.js') }}" defer></script>
 </head>
 <body>
-    <div class="card">
-        <div class="card-body">
-            <h1 class="center-heading">NLP - Emotion Detection</h1> 
-            <div style="padding: 25px 25px 25px 25px;">
-            <h2 class="mb-3">
-                <label class="form-label">Please enter the text to be analyzed</label>
-                <input type="textarea" class="form-control" id="textToAnalyze">
-            </h2>
-
-            <div style="padding: 25px 25px 25px 25px;">
-                <button onclick="RunSentimentAnalysis()" class="btn btn-secondary">Run Sentiment Analysis</button>
-            </div>
-            <div style="padding: 25px 25px 25px 25px;"></div>
-            <h2 class="mb-3">
-                <label class="form-label">Result of Emotion Detection</label>
-            </h2>
-
-            <div id="system_response" style="padding: 25px 25px 25px 25px;"></div>
-        </div>
+  <main class="container">
+    <div class="eyebrow">IBM Watson NLP · Python · Flask</div>
+    <h1>Emotion Detector</h1>
+    <p class="intro">
+      Enter an English sentence to analyze its emotional tone.
+      The application connects to IBM Watson NLP.
+    </p>
+    {% if demo_mode %}
+    <div class="demo-warning" role="status">
+      TEST MODE — Simulated Watson response for UI verification only.
+      This is not a live AI classification.
     </div>
+    {% endif %}
+    <section class="panel" aria-label="Emotion analysis">
+      <label for="textToAnalyze">Text to analyze</label>
+      <textarea id="textToAnalyze" name="textToAnalyze" rows="4"
+        placeholder="For example: I am happy to learn Python!"></textarea>
+      <button id="analyzeButton" type="button">Analyze emotion</button>
+      <p class="help">The detector supports anger, disgust, fear, joy, and sadness.</p>
+    </section>
+    <section id="responsePanel" class="panel response" aria-live="polite" hidden>
+      <h2>Analysis result</h2>
+      <p id="system_response"></p>
+    </section>
+  </main>
 </body>
+</html>
