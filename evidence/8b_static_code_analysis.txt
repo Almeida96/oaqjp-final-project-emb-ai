@@ -1,0 +1,18 @@
+Task 8, Activity 2 — REAL GitHub Actions execution
+Run: https://github.com/Almeida96/oaqjp-final-project-emb-ai/actions/runs/40728668130
+Platform: GitHub-hosted ubuntu-latest runner, Python 3.12
+Command: python -m pylint server.py --score=y --output-format=text
+Checks: Default Pylint rules, no disables added to the command
+
+Verified terminal output (GitHub timestamps omitted):
+
+------------------------------------
+Your code has been rated at 10.00/10
+
+Tests in the same job:
+Ran 17 tests in 0.224s
+OK
+
+Result: Pylint 10.00/10; workflow passed.
+Source file: server.py
+Note: This is code quality analysis, not an online Watson NLP availability test.
