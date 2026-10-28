@@ -1,0 +1,52 @@
+name: Peer grading - project folder structure screenshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/generate_folder_structure.py"
+      - ".github/workflows/folder-structure-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  folder-image:
+    name: Build 1_folder_structure.png from Git checkout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Pillow
+        run: python -m pip install Pillow
+      - name: Render tracked folder structure from real Git checkout
+        run: python tools/generate_folder_structure.py
+      - name: Verify generated PNG
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          p = Path("evidence/1_folder_structure.png")
+          assert p.is_file()
+          with Image.open(p) as image:
+              image.verify()
+          print(f"PASS: {p} exists and is a valid PNG")
+          PY
+      - name: Publish screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1-folder-structure
+          path: evidence/1_folder_structure.png
+          if-no-files-found: error
+      - name: Commit screenshot back to the repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evidence/1_folder_structure.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Add real repository folder structure image [skip ci]"
+            git push
+          fi
