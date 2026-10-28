@@ -1,0 +1,52 @@
+name: Task 7 - Error handling and screenshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/capture_empty_error.py"
+      - "test_emotion_detection.py"
+      - "test_server.py"
+      - ".github/workflows/error-handling-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  error-handling:
+    name: Verify status 400 and capture screenshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requirements and browser test tools
+        run: python -m pip install -r requirements.txt playwright
+      - name: Test Watson 400 and Flask blank input handling
+        run: python -m unittest -v test_emotion_detection test_server
+      - name: Ensure browser is available
+        run: |
+          if command -v google-chrome || command -v google-chrome-stable; then
+            echo "Using preinstalled Google Chrome"
+          else
+            python -m playwright install chromium
+          fi
+      - name: Verify actual HTTP 400 in browser and capture screenshot
+        run: PYTHONPATH=. python tools/capture_empty_error.py
+      - name: Upload error screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: 7c-error-handling-interface
+          path: evidence/7c_error_handling_interface.png
+          if-no-files-found: error
+      - name: Publish verified screenshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evidence/7c_error_handling_interface.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Add verified empty input error screenshot [skip ci]"
+            git push
+          fi
