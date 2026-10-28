@@ -1,0 +1,45 @@
+name: Task 4 - Package import and live Watson check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "verify_package.py"
+      - "EmotionDetection/__init__.py"
+      - ".github/workflows/package-verification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-import:
+    name: Package import and simulated emotion output
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Verify package module and function import
+        run: |
+          python3 -c "from EmotionDetection.emotion_detection import emotion_detector; print('PASS: module import')"
+          python3 -c "from EmotionDetection import emotion_detector; print('PASS: __init__.py export')"
+      - name: Verify anger response format using mocked Watson HTTP
+        run: python3 verify_package.py
+
+  live-watson:
+    name: Real Watson NLP request (may fail if service unavailable)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Execute exact course command against real Watson
+        run: |
+          python3 -c "from EmotionDetection.emotion_detection import emotion_detector; print(emotion_detector('I am very angry'))"
