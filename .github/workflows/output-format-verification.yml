@@ -1,0 +1,27 @@
+name: Task 3 formatted emotion output (mock)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "verify_output_format.py"
+      - "EmotionDetection/emotion_detection.py"
+      - ".github/workflows/output-format-verification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-format:
+    name: Validate required dictionary shape
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requests
+        run: python -m pip install requests
+      - name: Verify formatted output (simulated Watson response)
+        run: python verify_output_format.py
