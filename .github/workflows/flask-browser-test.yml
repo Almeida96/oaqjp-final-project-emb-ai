@@ -1,0 +1,55 @@
+name: Task 6 - Flask browser deployment test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server.py"
+      - "test_server.py"
+      - "requirements.txt"
+      - "templates/**"
+      - "static/**"
+      - "tools/capture_flask_demo.py"
+      - ".github/workflows/flask-browser-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  flask-browser-test:
+    name: Test Flask endpoints and capture real browser demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install application and browser test dependencies
+        run: python -m pip install -r requirements.txt playwright
+      - name: Run Flask route unit tests using mocks
+        run: python -m unittest -v test_server
+      - name: Ensure Chromium is available
+        run: |
+          if command -v google-chrome || command -v google-chrome-stable; then
+            echo "Using preinstalled Google Chrome"
+          else
+            python -m playwright install chromium
+          fi
+      - name: Start Flask and capture test-mode screenshot in Chromium
+        run: python tools/capture_flask_demo.py
+      - name: Upload screenshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 6b-deployment-test-simulated-watson
+          path: evidence/6b_deployment_test.png
+          if-no-files-found: error
+      - name: Publish screenshot into GitHub repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evidence/6b_deployment_test.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Add verified Flask browser screenshot (Watson mocked) [skip ci]"
+            git push
+          fi
