@@ -13,8 +13,11 @@ async function RunSentimentAnalysis() {
   responseText.textContent = "Analyzing...";
 
   try {
-    const url = "/emotionDetector?textToAnalyze=" + encodeURIComponent(text);
-    const response = await fetch(url);
+    const response = await fetch("/emotionDetector", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({textToAnalyze: text})
+    });
     const message = await response.text();
     if (!response.ok) {
       responsePanel.classList.add("error");

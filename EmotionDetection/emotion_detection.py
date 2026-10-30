@@ -5,6 +5,8 @@ longer available, the application raises a service error; it does not invent
 emotion scores or silently switch to a different model.
 """
 
+import math
+
 import requests
 
 SERVICE_URL = (
@@ -14,6 +16,7 @@ SERVICE_URL = (
 SERVICE_HEADERS = {
     "grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"
 }
+MAX_TEXT_LENGTH = 10_000
 EMOTION_NAMES = ("anger", "disgust", "fear", "joy", "sadness")
 
 
@@ -35,6 +38,9 @@ def emotion_detector(text_to_analyze):
     if not isinstance(text_to_analyze, str) or not text_to_analyze.strip():
         return empty_emotion_result()
 
+    if len(text_to_analyze) > MAX_TEXT_LENGTH:
+        raise ValueError("Text exceeds 10,000 characters")
+
     payload = {"raw_document": {"text": text_to_analyze.strip()}}
     response = requests.post(
         SERVICE_URL,
@@ -49,7 +55,11 @@ def emotion_detector(text_to_analyze):
     response.raise_for_status()
     try:
         emotions = response.json()["emotionPredictions"][0]["emotion"]
+        if any(isinstance(emotions[name], bool) for name in EMOTION_NAMES):
+            raise ValueError("Boolean scores are invalid")
         scores = {name: float(emotions[name]) for name in EMOTION_NAMES}
+        if any(not math.isfinite(score) or not 0 <= score <= 1 for score in scores.values()):
+            raise ValueError("Scores must be finite probabilities")
     except (KeyError, IndexError, TypeError, ValueError) as error:
         raise ValueError("Unexpected response from the Watson NLP service") from error
 

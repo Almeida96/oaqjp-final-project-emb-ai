@@ -98,6 +98,22 @@ class TestEmotionDetection(unittest.TestCase):
         with self.assertRaises(ValueError):
             emotion_detector("Test request")
 
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_invalid_probability_values_are_rejected(self, post):
+        post.return_value.status_code = 200
+        for value in (float("nan"), float("inf"), -0.1, 1.1, True):
+            post.return_value.json.return_value = {
+                "emotionPredictions": [{"emotion": {name: value for name in EMOTION_NAMES}}]
+            }
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                emotion_detector("example")
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_oversized_input_never_reaches_provider(self, post):
+        with self.assertRaises(ValueError):
+            emotion_detector("x" * 10001)
+        post.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

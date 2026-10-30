@@ -71,6 +71,24 @@ class TestFlaskRoutes(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    @patch("server.emotion_detector")
+    def test_post_json_and_invalid_input(self, detector):
+        detector.return_value = {
+            "anger": 0, "disgust": 0, "fear": 0, "joy": 1, "sadness": 0,
+            "dominant_emotion": "joy",
+        }
+        response = self.client.post("/emotionDetector", json={"textToAnalyze": "Example"})
+        self.assertEqual(response.status_code, 200)
+        detector.reset_mock()
+        for payload in ([], {"textToAnalyze": 42}, {"textToAnalyze": "x" * 10001}):
+            self.assertEqual(self.client.post("/emotionDetector", json=payload).status_code, 400)
+        detector.assert_not_called()
+
+    def test_request_body_limit(self):
+        response = self.client.post("/emotionDetector", data="x" * 70000,
+                                    content_type="application/json")
+        self.assertEqual(response.status_code, 413)
+
 
 if __name__ == "__main__":
     unittest.main()
