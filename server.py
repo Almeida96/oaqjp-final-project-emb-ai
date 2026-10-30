@@ -6,8 +6,10 @@ import requests
 from flask import Flask, render_template, request
 
 from EmotionDetection import emotion_detector
+from EmotionDetection.emotion_detection import MAX_TEXT_LENGTH
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024
 
 
 @app.get("/")
@@ -19,10 +21,14 @@ def home_page():
     )
 
 
-@app.get("/emotionDetector")
+@app.route("/emotionDetector", methods=["GET", "POST"])
 def detect_emotions():
     """Process user text and return formatted emotion analysis."""
-    text_to_analyze = request.args.get("textToAnalyze", "").strip()
+    payload = request.get_json(silent=True) if request.method == "POST" else request.args
+    text_to_analyze = payload.get("textToAnalyze", "") if hasattr(payload, "get") else ""
+    if not isinstance(text_to_analyze, str) or len(text_to_analyze) > MAX_TEXT_LENGTH:
+        return "Text must contain at most 10,000 characters.", 400
+    text_to_analyze = text_to_analyze.strip()
     if not text_to_analyze:
         return "Invalid text! Please try again!", 400
 
@@ -49,4 +55,4 @@ def detect_emotions():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=port)
