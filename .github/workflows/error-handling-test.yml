@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   error-handling:
@@ -41,12 +41,3 @@ jobs:
           name: 7c-error-handling-interface
           path: evidence/7c_error_handling_interface.png
           if-no-files-found: error
-      - name: Publish verified screenshot
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add evidence/7c_error_handling_interface.png
-          if ! git diff --cached --quiet; then
-            git commit -m "Add verified empty input error screenshot [skip ci]"
-            git push
-          fi

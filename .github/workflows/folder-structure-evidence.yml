@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   folder-image:
@@ -41,12 +41,3 @@ jobs:
           name: 1-folder-structure
           path: evidence/1_folder_structure.png
           if-no-files-found: error
-      - name: Commit screenshot back to the repository
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add evidence/1_folder_structure.png
-          if ! git diff --cached --quiet; then
-            git commit -m "Add real repository folder structure image [skip ci]"
-            git push
-          fi

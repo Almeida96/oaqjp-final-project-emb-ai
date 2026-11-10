@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   flask-browser-test:
@@ -44,12 +44,3 @@ jobs:
           name: 6b-deployment-test-simulated-watson
           path: evidence/6b_deployment_test.png
           if-no-files-found: error
-      - name: Publish screenshot into GitHub repository
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add evidence/6b_deployment_test.png
-          if ! git diff --cached --quiet; then
-            git commit -m "Add verified Flask browser screenshot (Watson mocked) [skip ci]"
-            git push
-          fi

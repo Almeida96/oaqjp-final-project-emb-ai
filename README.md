@@ -56,4 +56,8 @@ python -m pylint server.py
 
 Tests cover the five labels, HTTP failures, malformed and nonfinite scores, input limits, POST/GET compatibility and browser-template rendering. Existing course evidence remains in `evidence/`; those captures describe their original test context.
 
+Push checks run the reproducible offline tests. To check the actual IBM endpoint, manually run **Emotion detector - cloud verification** or **Task 4 - Package import and live Watson check** in GitHub Actions. Their live jobs run only on `workflow_dispatch` and fail if the external endpoint is unavailable or returns invalid predictions. A successful push check therefore does not establish provider availability.
+
+Screenshot workflows upload their captures as run artifacts. They have read-only repository permissions and do not create commits or update checked-in evidence.
+
 [Contribution guide](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) · [Apache 2.0 license](LICENSE)

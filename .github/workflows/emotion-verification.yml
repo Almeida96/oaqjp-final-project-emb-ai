@@ -30,6 +30,7 @@ jobs:
 
   watson-live:
     name: Real Watson NLP endpoint (requires external service)
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
