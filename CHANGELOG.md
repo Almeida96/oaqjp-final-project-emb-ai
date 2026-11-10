@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add a structured JSON endpoint for consumers and configurable Watson-compatible provider/model settings.
+
 ## 2026-10-30
 
 - Reject nonfinite, out-of-range and boolean emotion scores.

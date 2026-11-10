@@ -15,6 +15,20 @@ class TestFlaskRoutes(unittest.TestCase):
         app.config.update(TESTING=True, DEMO_MODE=False)
         self.client = app.test_client()
 
+    @patch("server.emotion_detector")
+    def test_json_api_returns_prediction_without_echoing_input(self, detector):
+        detector.return_value = {"anger": 0.1, "disgust": 0.1, "fear": 0.1, "joy": 0.6, "sadness": 0.1, "dominant_emotion": "joy"}
+        response = self.client.post('/api/emotions', json={"textToAnalyze": "private example"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, detector.return_value)
+        self.assertNotIn("private example", response.get_data(as_text=True))
+        self.assertEqual(self.client.get('/api/emotions').status_code, 405)
+        self.assertEqual(self.client.post('/api/emotions', json=[]).status_code, 400)
+        detector.side_effect = ValueError("bad provider payload")
+        failed = self.client.post('/api/emotions', json={"textToAnalyze": "example"})
+        self.assertEqual(failed.status_code, 503)
+        self.assertIn('error', failed.json)
+
     def test_home_renders_input_form(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)

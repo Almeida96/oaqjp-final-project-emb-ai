@@ -36,9 +36,15 @@ The response lists anger, disgust, fear, joy and sadness scores and their domina
 
 Text is limited to 10,000 characters. The browser sends JSON with POST so submitted text is not placed in the URL. The older GET route remains for course compatibility; avoid GET for private text because URLs can appear in logs and browser history.
 
+## JSON integration and provider configuration
+
+`POST /api/emotions` accepts the same JSON input and returns the five scores and `dominant_emotion` as a JSON object. Validation and service errors use an `error` field with HTTP 400 or 503. Input text is not echoed into the response. This route is suitable for scripts and agent tools; it does not require scraping the browser's prose output.
+
+The default remains the IBM course endpoint. To use a Watson-compatible service you operate, set `EMOTION_SERVICE_URL` and, if needed, `EMOTION_MODEL_ID` before starting the process. The endpoint must accept `{"raw_document":{"text":"..."}}` and return `emotionPredictions[0].emotion` with all five score fields. HTTPS is required except for a local loopback service. URLs containing credentials are rejected. This is a protocol adapter, not a bundled local model or a general adapter for unrelated NLP APIs.
+
 ## Data flow
 
-The browser sends text to Flask, which forwards it to the configured IBM lab endpoint with a 15-second timeout. There is no local database or analytics. Provider handling is governed by the lab service, not this project. Do not submit private text without understanding that external processing.
+The browser sends text to Flask, which forwards it to the configured service with a 15-second timeout. There is no local database or analytics. The default provider is the IBM lab; its data handling is outside this project's control. Review the selected provider's policy before sending private text.
 
 ## Development
 

@@ -3,7 +3,7 @@
 import os
 
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, render_template, request
 
 from EmotionDetection import emotion_detector
 from EmotionDetection.emotion_detection import MAX_TEXT_LENGTH
@@ -22,24 +22,33 @@ def home_page():
 
 
 @app.route("/emotionDetector", methods=["GET", "POST"])
+@app.post("/api/emotions")
 def detect_emotions():
     """Process user text and return formatted emotion analysis."""
     payload = request.get_json(silent=True) if request.method == "POST" else request.args
+    structured = request.path == "/api/emotions"
+
+    def failure(message, status):
+        return (jsonify({"error": message}), status) if structured else (message, status)
+
     text_to_analyze = payload.get("textToAnalyze", "") if hasattr(payload, "get") else ""
     if not isinstance(text_to_analyze, str) or len(text_to_analyze) > MAX_TEXT_LENGTH:
-        return "Text must contain at most 10,000 characters.", 400
+        return failure("Text must contain at most 10,000 characters.", 400)
     text_to_analyze = text_to_analyze.strip()
     if not text_to_analyze:
-        return "Invalid text! Please try again!", 400
+        return failure("Invalid text! Please try again!", 400)
 
     try:
         result = emotion_detector(text_to_analyze)
     except (requests.RequestException, ValueError) as error:
         app.logger.warning("Watson NLP could not analyze the text: %s", error)
-        return "Emotion service unavailable. Please try again later.", 503
+        return failure("Emotion service unavailable. Please try again later.", 503)
 
     if result["dominant_emotion"] is None:
-        return "Invalid text! Please try again!", 400
+        return failure("Invalid text! Please try again!", 400)
+
+    if structured:
+        return jsonify(result)
 
     message = (
         "For the given statement, the system response is "

@@ -45,6 +45,24 @@ class TestEmotionDetection(unittest.TestCase):
             timeout=15,
         )
 
+
+    @patch.dict("os.environ", {"EMOTION_SERVICE_URL": "http://127.0.0.1:8100/emotions", "EMOTION_MODEL_ID": "local-emotion-model"})
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_operator_endpoint_and_model_are_used(self, post):
+        post.return_value.status_code = 200
+        post.return_value.json.return_value = {"emotionPredictions": [{"emotion": dict.fromkeys(EMOTION_NAMES, 0.2)}]}
+        emotion_detector("Example text")
+        self.assertEqual(post.call_args.args[0], "http://127.0.0.1:8100/emotions")
+        self.assertEqual(post.call_args.kwargs["headers"]["grpc-metadata-mm-model-id"], "local-emotion-model")
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_invalid_provider_configuration_does_not_send_text(self, post):
+        for url in ("ftp://example.com", "https://user:password@example.com", "http://remote.example.com"):
+            with patch.dict("os.environ", {"EMOTION_SERVICE_URL": url}):
+                with self.assertRaises(ValueError):
+                    emotion_detector("Example text")
+        post.assert_not_called()
+
     def test_joy(self):
         self.assert_dominant_emotion("I am glad this happened", "joy")
 
